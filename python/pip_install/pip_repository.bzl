@@ -5,8 +5,7 @@ load("//python/pip_install:repositories.bzl", "all_requirements")
 def _pip_repository_impl(rctx):
     python_interpreter = rctx.attr.python_interpreter
     if rctx.attr.python_interpreter_target != None:
-        target = rctx.attr.python_interpreter_target
-        python_interpreter = rctx.path(target)
+        python_interpreter = rctx.executable.python_interpreter_target.path
     else:
         if "/" not in python_interpreter:
             python_interpreter = rctx.which(python_interpreter)
@@ -83,12 +82,16 @@ This option is required to support some packages which cannot handle the convers
             doc = "Additional data exclusion parameters to add to the pip packages BUILD file.",
         ),
         "python_interpreter": attr.string(default = "python3"),
-        "python_interpreter_target": attr.label(allow_single_file = True, doc = """
+        "python_interpreter_target": attr.label(
+            allow_single_file = True,
+            executable = True,
+            doc = """
 If you are using a custom python interpreter built by another repository rule,
 use this attribute to specify its BUILD target. This allows pip_repository to invoke
 pip using the same interpreter as your toolchain. If set, takes precedence over
 python_interpreter.
-"""),
+""",
+        ),
         "quiet": attr.bool(
             default = True,
             doc = "If True, suppress printing stdout and stderr output to the terminal.",
